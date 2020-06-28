@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# But this file and markdown files...
+!*.md
+!.gitignore
+
+# ... even if they are in subdirectories
+!*/
+
+# SOURCE: https://stackoverflow.com/a/987162/206413
