@@ -8,6 +8,15 @@ create table sta_logradouros
 select *
 from sirgas_shp_logradouronbl;
 
+alter table sta_logradouros modify column lg_ini_par int;
+alter table sta_logradouros modify column lg_fim_par int;
+alter table sta_logradouros modify column lg_ini_imp int;
+alter table sta_logradouros modify column lg_fim_imp int;
+--
+alter table sta_logradouros modify column lg_id     float;
+alter table sta_logradouros modify column lg_id     bigint;
+alter table sta_logradouros modify column lg_seg_id bigint;
+
 alter table sta_logradouros
 add column `id` int auto_increment primary key;
 
@@ -126,6 +135,9 @@ create table dat_logradouros_segmentos(
 	lg_fim int,
 	lg_seg_id bigint not null,
 	--
+	coord_ul_x varchar(255), coord_ul_y varchar(255),
+	coord_lr_x varchar(255), coord_lr_y varchar(255),
+	--
 	constraint fk_dat_log_seg
 	foreign key(lg_id)
 	references dat_logradouros(lg_id)
@@ -135,11 +147,14 @@ create table dat_logradouros_segmentos(
 -- Dump em dat_logradouros os segmentos sem dt
 -- -----------------------------------------------------------------------------
 
-insert into dat_logradouros_segmentos(lg_id, lg_ini, lg_fim, lg_seg_id)
+insert into dat_logradouros_segmentos(
+	lg_id, lg_ini, lg_fim, lg_seg_id,
+	coord_ul_x, coord_ul_y, coord_lr_x, coord_lr_y
+)
 select
-	distinct
-		lg_id, lg_ini, lg_fim, lg_seg_id
-from sta_logradouros sl2 
+	lg_id, lg_ini, lg_fim, lg_seg_id,
+	coord_ul_x, coord_ul_y, coord_lr_x, coord_lr_y
+from sta_logradouros
 where
 	lg_ini is null
 and lg_fim is null;
@@ -154,7 +169,8 @@ where lg_ini is null and lg_fim is null;
 drop table if exists `_sta_logradouros`;
 
 create table `_sta_logradouros`
-with lg as(	select lg_id, lg_ini as lg_number
+with lg as(
+	select lg_id, lg_ini as lg_number
 	from sta_logradouros sl
 	-- ---------
 	union all
@@ -189,7 +205,6 @@ delete from `_sta_logradouros`
 where
 	lg_ini = lg_fim
  or lg_ini = lg_fim + 1;
-
 
 create index tmp_ix_sta_logradouros
 on _sta_logradouros(lg_id, lg_ini, lg_fim);
